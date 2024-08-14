@@ -2,3 +2,7 @@ servers:
   - configuration: server
     deployment:
       type: on-pull-request
+  - configuration: server
+    deployment:
+      type: on-branch
+      branch: main
