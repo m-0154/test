@@ -1,0 +1,4 @@
+servers:
+  - configuration: server
+    deployment:
+      type: on-pull-request
