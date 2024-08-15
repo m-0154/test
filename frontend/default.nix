@@ -17,5 +17,5 @@ pkgs.runCommand "frontend" { } ''
   # bundling with webpack into the output
   webpack --env=mode=production --output-path $out
   # copying the html entry point into the output
-  cp ${./dist/index.html} $out/index.html
+  cp ${./index.html} $out/index.html
 ''
