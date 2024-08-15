@@ -8,14 +8,15 @@ let
     nodejs = pkgs.nodejs;
   };
 in
-pkgs.runCommand "frontend" { } ''
-  # linking npm dependencies into the build directory
-  ln -sf ${node_modules}/node_modules node_modules
-  # copying the source files into the build directory
-  cp -r ${src}/. .
-  export PATH="${node_modules}/node_modules/.bin:$PATH"
-  # bundling with webpack into the output
-  webpack --env=mode=production --output-path $out
-  # copying the html entry point into the output
-  cp ${./index.html} $out/index.html
-''
+pkgs.runCommand "frontend"
+{ buildInputs = [ pkgs.nodejs ]; }
+  ''
+    # linking npm dependencies into the build directory
+    ln -sf ${node_modules}/node_modules node_modules
+    # copying the source files into the build directory
+    cp -r ${src}/. .
+    # bundling with webpack into the output
+    npm run build -- --output-path $out
+    # copying the html entry point into the output
+    cp ${./index.html} $out/index.html
+  ''
