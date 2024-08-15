@@ -16,7 +16,7 @@
     inputs.flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-darwin" ]
       (system:
         let
-          pkgs = inputs.nixpkgs.legacyPackages.${system};
+          pkgs = import inputs.nixpkgs { inherit system; };
         in
         {
           # Here you can define packages that your flake outputs.
