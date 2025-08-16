@@ -3,7 +3,7 @@
 let
   # TODO: add your public ssh key here to be able to log into the deployed host (as user `me`).
   sshKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBk/ETEjntRbY57kXvyAyvumRZtP4S9eI5GeOskILYBP"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKRKLLCupb952BT2YkDohN3E5NKvZXn+Eq8OVmOyk8BS maanya@maanya-HP-Pavilion-x360-Convertible"
   ];
   backendPort = "3000";
 in
