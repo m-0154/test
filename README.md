@@ -12,3 +12,4 @@ To deploy this on garnix:
 4) [Optional] Add your public ssh key in [./hosts/server.nix](https://github.com/garnix-io/template-typescript-go/blob/main/hosts/server.nix). This will allow you to ssh into your deployed host.
 5) Push your changes! garnix will build and deploy the package, and make your
    server available on a `garnix.me` domain.
+   
