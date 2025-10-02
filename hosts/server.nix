@@ -58,11 +58,14 @@ in
   # We ensure the socket has the docker group and readable by that group by running
   # a small ExecStartPost chmod/chgrp. This avoids creating a regular file at that
   # path which would block socket creation.
-  systemd.services."docker" = {
-    serviceConfig = {
-      ExecStartPost = "${pkgs.coreutils}/bin/chown root:docker /var/run/docker.sock && ${pkgs.coreutils}/bin/chmod 0660 /var/run/docker.sock";
-    };
+ systemd.services."docker" = {
+  serviceConfig = {
+    ExecStartPost = [
+      "${pkgs.coreutils}/bin/chown root:docker /var/run/docker.sock"
+      "${pkgs.coreutils}/bin/chmod 0660 /var/run/docker.sock"
+    ];
   };
+};
 
   # Backend service
   systemd.services.backend = {
