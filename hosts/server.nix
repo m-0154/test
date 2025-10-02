@@ -43,7 +43,7 @@ in
     enable = true;
     # Expose both the unix socket and an unauthenticated TCP socket on 0.0.0.0:2375
     # WARNING: this is insecure and will allow anyone who can reach the host to control Docker.
-    extraOptions = [ "-H" "unix:///var/run/docker.sock" "-H" "tcp://0.0.0.0:2375" ];
+    extraOptions = "-H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375";
   };
 
   # Ensure the docker unix socket is world-writable so any local user can use Docker
