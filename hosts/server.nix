@@ -38,8 +38,8 @@ in
     pkgs.docker-compose # Docker Compose CLI
   ];
 
-  # Start Docker daemon and expose it (UNAUTHENTICATED) on TCP 2375 and unix socket
-  services.docker = {
+  # Start Docker daemon via the NixOS module (module is `virtualisation.docker`, not `services.docker`)
+  virtualisation.docker = {
     enable = true;
     # Expose both the unix socket and an unauthenticated TCP socket on 0.0.0.0:2375
     # WARNING: this is insecure and will allow anyone who can reach the host to control Docker.
