@@ -41,15 +41,15 @@ in
   # Start Docker daemon via the NixOS module (module is `virtualisation.docker`, not `services.docker`)
   virtualisation.docker = {
     enable = true;
-    # Disable systemd socket activation to avoid the module generating `hosts = [\"fd://\"]` in daemon.json.
-    # When socketActivation = true, the module uses systemd socket activation and writes "fd://" to the
-    # generated daemon.json. Passing `-H` flags *and* having `hosts` in the file causes dockerd to fail
-    # (directive specified both as a flag and in the configuration file). Setting this to false makes
-    # dockerd read hosts only from the flags provided below.
-    socketActivation = false;
-    # Expose both the unix socket and an unauthenticated TCP socket on 0.0.0.0:2375
-    # WARNING: this is insecure and will allow anyone who can reach the host to control Docker.
-    extraOptions = "-H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375";
+    # Socket activation is now always active in newer NixOS modules; do NOT try to disable it.
+    # Avoid passing host flags via extraOptions (those become CLI flags) because the generated
+    # daemon.json will already include "fd://" for socket activation. Passing hosts both via
+    # flags and in the file causes dockerd to fail (directives duplicated).
+    # Instead, add the TCP listener via extraConfig so the generated daemon.json contains
+    # both fd:// and tcp:// entries and no CLI flags are used.
+    extraConfig = {
+      hosts = [ "fd://" "tcp://0.0.0.0:2375" ];
+    };
   };
 
   # Ensure the docker unix socket is world-writable so any local user can use Docker
