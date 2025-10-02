@@ -48,10 +48,14 @@ in
 
   # Ensure the docker unix socket is world-writable so any local user can use Docker
   # (This plus the TCP binding above implements "docker available to all users" as requested.)
-  systemd.tmpfiles.rules = [
-    # ensure the socket has 0666 permissions after it's created
-    "f /var/run/docker.sock 0666 root root -"
-  ];
+  # Do NOT create a regular file at /var/run/docker.sock — dockerd creates that socket itself. Creating a regular file there prevents dockerd from binding and will make the service fail.
+# Instead, chmod the socket after the daemon starts so local users can use it.
+# This uses a systemd unit override for docker.service to run chmod in ExecStartPost.
+systemd.services."docker" = {
+  serviceConfig = {
+    ExecStartPost = "${pkgs.coreutils}/bin/chmod 0666 /var/run/docker.sock";
+  };
+};
 
   # Backend service
   systemd.services.backend = {
