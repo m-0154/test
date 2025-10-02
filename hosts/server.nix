@@ -49,7 +49,7 @@ in
   # Ensure the docker unix socket is world-writable so any local user can use Docker
   # (This plus the TCP binding above implements "docker available to all users" as requested.)
   systemd.tmpfiles.rules = [
-    # Ensure the socket has 0666 permissions after it's created
+    # ensure the socket has 0666 permissions after it's created
     "f /var/run/docker.sock 0666 root root -"
   ];
 
@@ -85,4 +85,5 @@ in
   networking.firewall.enable = false;
 
   # Required for Garnix
-  nixpkgs.hostPlatform = "x
+  nixpkgs.hostPlatform = "x86_64-linux";
+}
