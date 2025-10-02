@@ -11,6 +11,9 @@ in
   # Garnix server setup
   garnix.server.enable = true;
 
+  # Recommended: set system.stateVersion for reproducible behaviour
+  system.stateVersion = "24.05";
+
   # Enable SSH so we can log in
   services.openssh.enable = true;
 
@@ -22,7 +25,7 @@ in
     openssh.authorizedKeys.keys = sshKeys;
   };
 
-  # Create docker group (so the group exists if any tooling expects it)
+  # Create docker group (so the group exists and we can add users to it)
   users.groups = {
     docker = {};
   };
@@ -38,30 +41,28 @@ in
     pkgs.docker-compose # Docker Compose CLI
   ];
 
-  # Start Docker daemon via the NixOS module (module is `virtualisation.docker`, not `services.docker`)
+  # Use the NixOS docker module but do NOT try to supply hosts via flags (extraOptions)
+  # because the module always enables socket activation and writes "fd://" into the
+  # generated daemon.json. Passing -H flags together with fd:// causes dockerd to fail.
+  # For a stable, compatible setup we:
+  #  - enable docker (socket activation remains active)
+  #  - do not pass -H flags here
+  #  - let the daemon use socket activation (fd://) only
   virtualisation.docker = {
     enable = true;
-    # Socket activation is now always active in newer NixOS modules; do NOT try to disable it.
-    # Avoid passing host flags via extraOptions (those become CLI flags) because the generated
-    # daemon.json will already include "fd://" for socket activation. Passing hosts both via
-    # flags and in the file causes dockerd to fail (directives duplicated).
-    # Instead, add the TCP listener via extraConfig so the generated daemon.json contains
-    # both fd:// and tcp:// entries and no CLI flags are used.
-    extraConfig = {
-      hosts = [ "fd://" "tcp://0.0.0.0:2375" ];
-    };
+    # NOTE: Avoid setting extraOptions or socketActivation here — modern modules
+    # always enable socket activation and will generate the required config.
   };
 
-  # Ensure the docker unix socket is world-writable so any local user can use Docker
-  # (This plus the TCP binding above implements "docker available to all users" as requested.)
-  # Do NOT create a regular file at /var/run/docker.sock — dockerd creates that socket itself. Creating a regular file there prevents dockerd from binding and will make the service fail.
-# Instead, chmod the socket after the daemon starts so local users can use it.
-# This uses a systemd unit override for docker.service to run chmod in ExecStartPost.
-systemd.services."docker" = {
-  serviceConfig = {
-    ExecStartPost = "${pkgs.coreutils}/bin/chmod 0666 /var/run/docker.sock";
+  # After dockerd starts it will create /var/run/docker.sock (root:docker, srw-rw----)
+  # We ensure the socket has the docker group and readable by that group by running
+  # a small ExecStartPost chmod/chgrp. This avoids creating a regular file at that
+  # path which would block socket creation.
+  systemd.services."docker" = {
+    serviceConfig = {
+      ExecStartPost = "${pkgs.coreutils}/bin/chown root:docker /var/run/docker.sock && ${pkgs.coreutils}/bin/chmod 0660 /var/run/docker.sock";
+    };
   };
-};
 
   # Backend service
   systemd.services.backend = {
@@ -91,7 +92,7 @@ systemd.services."docker" = {
     };
   };
 
-  # Disable firewall entirely (exposes all ports)
+  # Disable firewall entirely (exposes all ports) — WARNING: this exposes the host.
   networking.firewall.enable = false;
 
   # Required for Garnix
